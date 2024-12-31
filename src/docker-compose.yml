@@ -1,0 +1,31 @@
+services:
+  shop.db:
+    image: mcr.microsoft.com/mssql/server
+
+  seq:
+    image: datalust/seq:latest
+
+  cache:
+    image: redis:latest
+
+  identity:
+    image: quay.io/keycloak/keycloak:latest
+
+  maildev:
+    image: maildev/maildev
+
+  messagebroker:
+    image: rabbitmq:management
+
+  notification.api:
+    image: ${DOCKER_REGISTRY-}notificationapi
+    build:
+      context: .
+      dockerfile: Services/Notification/Notification.API/Dockerfile
+
+  shop.api:
+    image: ${DOCKER_REGISTRY-}shopapi
+    build:
+      context: .
+      dockerfile: Services/Shop/Shop.API/Dockerfile
+

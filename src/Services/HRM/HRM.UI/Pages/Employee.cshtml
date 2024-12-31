@@ -1,0 +1,93 @@
+@page
+@using HRM.UI.Models
+@using HRM_UI.Models
+
+<h2>Employees</h2>
+
+@(Html.DevExtreme().DataGrid<EmployeeVM>()
+    .ShowBorders(true)
+    .DataSource(d => d.Mvc().Controller("Employees").LoadAction("Get").Key("Id"))
+    .Columns(columns => {
+      columns.AddFor(m => m.OrganizationName);
+
+      columns.AddFor(m => m.FullName);
+
+      columns.AddFor(m => m.DateOfBirth);
+
+      columns.AddFor(m => m.Title);
+
+      columns.AddFor(m => m.Description);
+
+      columns.AddFor(m => m.Id).Visible(false);
+
+      @* columns.AddFor(m => m.ParentOrganizationId)
+          .Width(150)
+          .Visible(false)
+          .Lookup(lookup => lookup
+              .DataSource(ds => ds.Mvc().Controller("Organizations").LoadAction("Get").Key("Id"))
+              .DataSourceOptions(dso => dso.Sort(sort => sort.AddSorting("Id")))
+              .ValueExpr("Id")
+              .DisplayExpr("Name")
+          ); *@
+    })
+    .Paging(p => p.PageSize(10))
+    .FilterRow(f => f.Visible(true))
+    .HeaderFilter(f => f.Visible(true))
+    .GroupPanel(p => p.Visible(true))
+    .Grouping(g => g.AutoExpandAll(false))
+    .RemoteOperations(true)
+)
+
+@* @(Html.DevExtreme().TreeList<EmployeeVM>()
+    .ID("employees")
+    .DataSource(ds => ds.Mvc()
+        .Controller("Employees")
+        .LoadAction("Get")
+        .UpdateAction("Put")
+        .InsertAction("Post")
+        .DeleteAction("Delete")
+        .Key("OrganizationId")
+    )
+    .KeyExpr("OrganizationId")
+    .ParentIdExpr("ParentOrganizationId")
+    .ShowRowLines(true)
+    .ShowBorders(true)
+    .Editing(editing => editing
+        .Mode(GridEditMode.Form)
+        .AllowUpdating(true)
+        .AllowAdding(true)
+    )
+    .Columns(columns =>
+    {
+      columns.AddFor(m => m.OrganizationName);
+
+      columns.AddFor(m => m.FullName);
+
+      columns.AddFor(m => m.DateOfBirth);
+
+      columns.AddFor(m => m.Title);
+
+      columns.AddFor(m => m.Description);
+
+      columns.AddFor(m => m.Id).Visible(false);
+
+      columns.AddFor(m => m.ParentOrganizationId)
+          .Width(150)
+          .Visible(false)
+          .Lookup(lookup => lookup
+              .DataSource(ds => ds.Mvc().Controller("Organizations").LoadAction("Get").Key("Id"))
+              .DataSourceOptions(dso => dso.Sort(sort => sort.AddSorting("Id")))
+              .ValueExpr("Id")
+              .DisplayExpr("Name")
+          );
+
+      columns.Add()
+          .Type(TreeListCommandColumnType.Buttons)
+          .Buttons(b =>
+          {
+            b.Add().Name(TreeListColumnButtonName.Edit);
+          });
+    })
+    .ColumnAutoWidth(true)
+    .AutoExpandAll(true)
+) *@

@@ -1,0 +1,129 @@
+services:
+  shop.db:
+    container_name: shop.db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=cungau@0812
+    restart: always
+    ports:
+      - "1533:1433"
+    volumes:
+      - ./.containers/db/shop:/var/opt/mssql/data
+
+  seq:
+    container_name: seq
+    environment:
+      - ACCEPT_EULA=Y
+    restart: always
+    ports:
+      - 5341:5341
+      - 8081:80
+  
+  cache:
+    container_name: cache
+    restart: always
+    ports:
+      - "6479:6379"
+
+  identity:
+    container_name: identity
+    command: start-dev --import-realm
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - ./.containers/identity:/opt/keycloak/data
+      - ./.files/realm-export.json:/opt/keycloak/data/import/realm.json
+    restart: always
+    ports:
+      - "18081:8080"
+
+  maildev:
+    container_name: maildev
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -O - http://127.0.0.1:1080/healthz || exit 1" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    restart: always
+    ports:
+      - "1025:1025"
+      - "1080:1080"
+  
+  messagebroker:
+    container_name: messagebroker
+    hostname: atom-mq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASSWORD=guest
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  notification.api:
+    container_name: notification.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      # https://learn.microsoft.com/en-us/aspnet/core/security/docker-https?view=aspnetcore-9.0
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=luunt
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
+      - MessageBroker__Host=amqp://atom-mq:5672
+      - MessageBroker__UserName=guest
+      - MessageBroker__Password=guest
+      - Smtp__Host=maildev
+      - Smtp__Port=1025
+    ports:
+      - "8000:8080"
+      - "8060:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+    depends_on:
+      - messagebroker
+      - maildev
+
+  shop.api:
+    container_name: shop.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=luunt
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
+      - ConnectionStrings__Database=Server=shop.db,1433;Database=ShopDb;User Id=sa;Password=cungau@0812;Encrypt=False;TrustServerCertificate=True
+      - ConnectionStrings__Cache=cache:6379
+      - Serilog__WriteTo[1]__Args__serverUrl=http://seq:5341
+      - Authentication__Audience=account
+      - Authentication__ValidIssuer=http://identity:8080/realms/atom-services
+      - Authentication__MetadataUrl=http://identity:8080/realms/atom-services/.well-known/openid-configuration
+      - Authentication__RequireHttpsMetadata=false
+      - Keycloak__BaseUrl=http://identity:8080
+      - Keycloak__AdminUrl=http://identity:8080/admin/realms/atom-services/
+      - Keycloak__TokenUrl=http://identity:8080/realms/atom-services/protocol/openid-connect/token
+      - Keycloak__AdminClientId=atom-admin-client
+      - Keycloak__AdminClientSecret=EHc03L80GUA1OxIuKYMiMK8jL8umZWdI
+      - Keycloak__AuthClientId=atom-auth-client
+      - Keycloak__AuthClientSecret=oXxBeCh6KsSwRzNOGqWj2Lwqo5GLWJY4
+      - Outbox__IntervalInSeconds=10
+      - Outbox__BatchSize=10
+      - MessageBroker__Host=amqp://atom-mq:5672
+      - MessageBroker__UserName=guest
+      - MessageBroker__Password=guest
+      - Smtp__Host=maildev
+      - Smtp__Port=1025
+    ports:
+      - "8001:8080"
+      - "8061:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+    depends_on:
+      - shop.db
+      - seq
+      - cache
+      - identity
+      - maildev
+      - messagebroker
