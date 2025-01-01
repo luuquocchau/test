@@ -1,4 +1,5 @@
 using HRM.UI.Services;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,18 +8,20 @@ builder.Services
     .AddRazorPages()
     .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
 
-builder.Services.AddHttpClient<OrganizationService>(client =>
-{
-    // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-    // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-    client.BaseAddress = new("http://localhost:5160");
-});
+//builder.Services.AddHttpClient<OrganizationService>(client =>
+//{
+//    client.BaseAddress = new(builder.Configuration["ApiSettings:BaseUrl"]);
+//});
+
+builder.Services.AddRefitClient<IOrganizationService>()
+    .ConfigureHttpClient(c =>
+    {
+        c.BaseAddress = new(builder.Configuration["ApiSettings:BaseUrl"]!);
+    });
 
 builder.Services.AddHttpClient<EmployeeService>(client =>
 {
-    // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-    // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-    client.BaseAddress = new("http://localhost:5160");
+    client.BaseAddress = new(builder.Configuration["ApiSettings:BaseUrl"]);
 });
 
 var app = builder.Build();

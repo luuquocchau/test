@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.SharedKernel;
+using FluentResults;
 using HRM.Domain.Employees;
 
 namespace HRM.Domain.Organizations;
@@ -13,13 +14,13 @@ public sealed class Organization : AggregateRoot<int>
 
     public string? Description { get; private set; }
 
-    public int? ParentId { get; set; }
+    public int? ParentId { get; private set; }
 
-    public Organization? Parent { get; set; }
+    public Organization? Parent { get; private set; }
 
-    public ICollection<Organization> Children { get; set; } = new List<Organization>();
+    public ICollection<Organization> Children { get; private set; } = new List<Organization>();
 
-    public ICollection<Employee> Employees { get; set; } = new List<Employee>();
+    public ICollection<Employee> Employees { get; private set; } = new List<Employee>();
 
     private Organization()
     {
@@ -40,7 +41,7 @@ public sealed class Organization : AggregateRoot<int>
         ParentId = parentId;
     }
 
-    public static Organization Create(
+    public static Result<Organization> Create(
         string name,
         string location,
         bool? isActive,
@@ -48,10 +49,10 @@ public sealed class Organization : AggregateRoot<int>
         int? parentId)
     {
         var organization = new Organization(name, location, isActive, description, parentId);
-        return organization;
+        return Result.Ok(organization);
     }
 
-    public void Update(string name,
+    public Result Update(string name,
         string location,
         bool? isActive,
         string? description,
@@ -62,5 +63,7 @@ public sealed class Organization : AggregateRoot<int>
         IsActive = isActive;
         Description = description;
         ParentId = parentId;
+
+        return Result.Ok();
     }
 }

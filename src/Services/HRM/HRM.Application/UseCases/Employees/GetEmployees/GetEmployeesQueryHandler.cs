@@ -1,17 +1,18 @@
-﻿using HRM.Application.Abstractions.CQRS;
+﻿using FluentResults;
+using HRM.Application.Abstractions.CQRS;
 using HRM.Application.Abstractions.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace HRM.Application.UseCases.Employees.GetEmployees;
 
 internal sealed class GetEmployeesQueryHandler(IHRMDbContext hrmDbContext)
-    : IQueryHandler<GetEmployeesQuery, List<EmployeeResponse>>
+    : IQueryHandler<GetEmployeesQuery, Result<List<EmployeeDto>>>
 {
-    public async Task<List<EmployeeResponse>> Handle(GetEmployeesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<EmployeeDto>>> Handle(GetEmployeesQuery request, CancellationToken cancellationToken)
     {
         var employees = await hrmDbContext.Employees.Include(p => p.Organization)
             .OrderBy(o => o.FullName)
-            .Select(p => new EmployeeResponse(
+            .Select(p => new EmployeeDto(
                 p.Id,
                 p.FullName,
                 p.DateOfBirth,
@@ -21,6 +22,7 @@ internal sealed class GetEmployeesQueryHandler(IHRMDbContext hrmDbContext)
                 p.Organization.ParentId,
                 p.Organization.Name))
             .ToListAsync(cancellationToken);
-        return employees;
+
+        return Result.Ok(employees);
     }
 }

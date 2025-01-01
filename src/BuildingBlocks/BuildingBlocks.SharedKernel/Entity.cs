@@ -6,7 +6,7 @@ namespace BuildingBlocks.SharedKernel;
 public abstract class Entity<TId> : IEntity<TId>
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public TId Id { get; set; } = default!;
+    public TId Id { get; init; } = default!;
 
     [StringLength(50)]
     public string? CreatedBy { get; set; }

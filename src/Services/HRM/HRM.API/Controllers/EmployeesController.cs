@@ -1,6 +1,7 @@
 ﻿using HRM.Application.UseCases.Employees.GetEmployees;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace HRM.API.Controllers
 {
@@ -20,9 +21,9 @@ namespace HRM.API.Controllers
         {
             var query = new GetEmployeesQuery();
 
-            List<EmployeeResponse> result = await _sender.Send(query, cancellationToken);
+            var result = await _sender.Send(query, cancellationToken);
 
-            return Ok(result);
+            return Ok(result.Value);
         }
     }
 }

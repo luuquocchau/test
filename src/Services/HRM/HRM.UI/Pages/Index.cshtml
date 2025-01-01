@@ -2,7 +2,7 @@
 @using HRM.UI.Models
 @using HRM_UI.Models
 
-<h2>Home</h2>
+<h2>Organization</h2>
 
 @* @(Html.DevExtreme().DataGrid<OrganizationVM>()
     .ShowBorders(true)
@@ -37,9 +37,30 @@
     .ShowRowLines(true)
     .ShowBorders(true)
     .Editing(editing => editing
-        .Mode(GridEditMode.Form)
+        .Form(f => f.ColCount(1).Items(items => {
+          items.AddSimpleFor(m => m.Name);
+          items.AddSimpleFor(m => m.Location);
+          items.AddSimpleFor(m => m.Description);
+          items.AddSimpleFor(m => m.IsActive);
+          items.AddSimpleFor(m => m.ParentId).Editor(e => e
+            .DropDownBox()
+            .ValueExpr("Id")
+            .DisplayExpr("Name")
+            .ShowClearButton(true)
+            .ContentTemplate(new TemplateName("ParentIdTemplate"))
+            .OnInitialized(@<text>
+                function(e){
+                    if(e.component.option("value") == 0) {
+                        e.component.option("value", null);
+                    }
+                }
+            </text>)
+            );
+        }))
+        .Mode(GridEditMode.Popup)
         .AllowUpdating(true)
         .AllowAdding(true)
+        .AllowDeleting(true)
     )
     .Columns(columns =>
     {
@@ -51,8 +72,6 @@
 
       columns.AddFor(m => m.IsActive);
 
-      columns.AddFor(m => m.Id).Visible(false);
-
       columns.AddFor(m => m.ParentId)
           .Width(150)
           .Visible(false)
@@ -62,14 +81,38 @@
               .ValueExpr("Id")
               .DisplayExpr("Name")
           );
-
-      columns.Add()
-          .Type(TreeListCommandColumnType.Buttons)
-          .Buttons(b =>
-          {
-            b.Add().Name(TreeListColumnButtonName.Edit);
-          });
     })
     .ColumnAutoWidth(true)
     .AutoExpandAll(true)
 )
+
+@using (Html.DevExtreme().NamedTemplate("ParentIdTemplate"))
+{
+    @(Html.DevExtreme().TreeView()
+        .DataSource(new JS(@"component.option('dataSource')"))
+        .KeyExpr("Id")
+        .DisplayExpr("Name")
+        .ParentIdExpr("ParentId")
+        .DataStructure(TreeViewDataStructure.Plain)
+        .SelectionMode(NavSelectionMode.Single)
+        .SelectByClick(true)
+        .SearchEnabled(true)
+        .SearchMode(CollectionSearchMode.Contains)
+        .Height(250)
+        .OnItemClick(@<text>
+            function(args) {
+                component.close();
+            }
+        </text>)
+        .OnItemSelectionChanged(@<text>
+            function(args) {
+                component.option("value", args.component.getSelectedNodeKeys()[0]);
+            }
+        </text>)
+        .OnContentReady(@<text>
+            function(args) {
+                args.component.selectItem(component.option('value'));
+            }
+        </text>)
+    )
+}

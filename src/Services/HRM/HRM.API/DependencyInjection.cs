@@ -1,4 +1,5 @@
-﻿using HRM.Infrastructure.Data.Extensions;
+﻿using Carter;
+using HRM.Infrastructure.Data.Extensions;
 
 namespace HRM.API;
 
@@ -13,6 +14,8 @@ public static class DependencyInjection
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen();
+
+        services.AddCarter();
 
         return services;
     }
@@ -35,6 +38,8 @@ public static class DependencyInjection
         //app.UseAuthorization();
 
         app.MapControllers();
+
+        app.MapCarter();
 
         return app;
     }
