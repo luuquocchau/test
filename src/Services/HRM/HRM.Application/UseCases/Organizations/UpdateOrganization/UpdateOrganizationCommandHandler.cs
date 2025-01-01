@@ -18,7 +18,8 @@ internal sealed class UpdateOrganizationCommandHandler(IOrganizationRepository o
             command.Location,
             command.IsActive,
             command.Description,
-            command.ParentId);
+            command.ParentId,
+            organizationRepository);
 
         if (result.IsFailed)
             return result;

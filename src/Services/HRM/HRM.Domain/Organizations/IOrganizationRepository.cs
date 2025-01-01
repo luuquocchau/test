@@ -7,4 +7,6 @@ public interface IOrganizationRepository
     Task AddAsync(Organization organization, CancellationToken cancellationToken = default);
 
     void Remove(Organization organization);
+
+    bool CheckValidParentOrganizationId(int id, int? parentId);
 }

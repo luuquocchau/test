@@ -14,4 +14,8 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.SharedKernel\BuildingBlocks.SharedKernel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Organizations\Events\" />
+  </ItemGroup>
+
 </Project>

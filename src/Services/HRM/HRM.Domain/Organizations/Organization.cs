@@ -1,6 +1,7 @@
 ﻿using BuildingBlocks.SharedKernel;
 using FluentResults;
 using HRM.Domain.Employees;
+using HRM.Domain.Organizations.Rules;
 
 namespace HRM.Domain.Organizations;
 
@@ -56,8 +57,14 @@ public sealed class Organization : AggregateRoot<int>
         string location,
         bool? isActive,
         string? description,
-        int? parentId)
+        int? parentId,
+        IOrganizationRepository organizationRepository)
     {
+        CheckRule(new ParentOrganizationIdMustBeValidRule(Id, parentId, organizationRepository));
+        //var result = Result.Merge(
+        //    Result.FailIf(organizationRepository.CheckValidParentOrganizationId(Id, parentId), new Error("Parent Organization Id must be valid"))
+        //);
+
         Name = name;
         Location = location;
         IsActive = isActive;
