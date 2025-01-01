@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.SharedKernel;
+using FluentResults;
 using HRM.Domain.Organizations;
 
 namespace HRM.Domain.Employees;
@@ -36,7 +37,7 @@ public sealed class Employee : AggregateRoot<int>
         OrganizationId = organizationId;
     }
 
-    public static Employee Create(
+    public static Result<Employee> Create(
         string fullName,
         DateTime dateOfBirth,
         string title,
@@ -44,10 +45,10 @@ public sealed class Employee : AggregateRoot<int>
         int organizationId)
     {
         var employee = new Employee(fullName, dateOfBirth, title, description, organizationId);
-        return employee;
+        return Result.Ok(employee);
     }
 
-    public void Update(string fullName,
+    public Result Update(string fullName,
         DateTime dateOfBirth,
         string title,
         string? description,
@@ -58,5 +59,7 @@ public sealed class Employee : AggregateRoot<int>
         Title = title;
         Description = description;
         OrganizationId = organizationId;
+
+        return Result.Ok();
     }
 }

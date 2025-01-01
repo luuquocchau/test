@@ -6,9 +6,49 @@
 
 @(Html.DevExtreme().DataGrid<EmployeeVM>()
     .ShowBorders(true)
-    .DataSource(d => d.Mvc().Controller("Employees").LoadAction("Get").Key("Id"))
+    .DataSource(ds => ds.Mvc()
+        .Controller("Employees")
+        .LoadAction("Get")
+        .UpdateAction("Put")
+        .InsertAction("Post")
+        .DeleteAction("Delete")
+        .Key("Id")
+    )
+    .Editing(editing => editing
+        .Form(f => f.ColCount(1).Items(items => {
+          items.AddSimpleFor(m => m.FullName);
+          items.AddSimpleFor(m => m.DateOfBirth);
+          items.AddSimpleFor(m => m.Title);
+          items.AddSimpleFor(m => m.Description);
+          items.AddSimpleFor(m => m.OrganizationId).Editor(e => e
+            .DropDownBox()
+            .ValueExpr("Id")
+            .DisplayExpr("Name")
+            .ShowClearButton(true)
+            .ContentTemplate(new TemplateName("ParentIdTemplate"))
+            .OnInitialized(@<text>
+                function(e){
+                    if(e.component.option("value") == 0) {
+                        e.component.option("value", null);
+                    }
+                }
+            </text>)
+            );
+        }))
+        .Mode(GridEditMode.Popup)
+        .AllowUpdating(true)
+        .AllowAdding(true)
+        .AllowDeleting(true)
+    )
     .Columns(columns => {
       columns.AddFor(m => m.OrganizationName);
+
+      columns.AddFor(m => m.OrganizationId)
+        .Lookup(lookup => lookup
+            .DataSource(d => d.Mvc().Controller("Organizations").LoadAction("Get").Key("Id"))
+            .DisplayExpr("Id")
+            .ValueExpr("Id")
+        );
 
       columns.AddFor(m => m.FullName);
 
@@ -19,16 +59,6 @@
       columns.AddFor(m => m.Description);
 
       columns.AddFor(m => m.Id).Visible(false);
-
-      @* columns.AddFor(m => m.ParentOrganizationId)
-          .Width(150)
-          .Visible(false)
-          .Lookup(lookup => lookup
-              .DataSource(ds => ds.Mvc().Controller("Organizations").LoadAction("Get").Key("Id"))
-              .DataSourceOptions(dso => dso.Sort(sort => sort.AddSorting("Id")))
-              .ValueExpr("Id")
-              .DisplayExpr("Name")
-          ); *@
     })
     .Paging(p => p.PageSize(10))
     .FilterRow(f => f.Visible(true))
@@ -38,56 +68,37 @@
     .RemoteOperations(true)
 )
 
-@* @(Html.DevExtreme().TreeList<EmployeeVM>()
-    .ID("employees")
-    .DataSource(ds => ds.Mvc()
-        .Controller("Employees")
-        .LoadAction("Get")
-        .UpdateAction("Put")
-        .InsertAction("Post")
-        .DeleteAction("Delete")
-        .Key("OrganizationId")
+@using (Html.DevExtreme().NamedTemplate("ParentIdTemplate"))
+{
+    @(Html.DevExtreme().TreeView()
+        .DataSource(ds => ds.Mvc()
+            .Controller("Organizations")
+            .LoadAction("Get")
+            .Key("Id")
+        )
+        .KeyExpr("Id")
+        .DisplayExpr("Name")
+        .ParentIdExpr("ParentId")
+        .DataStructure(TreeViewDataStructure.Plain)
+        .SelectionMode(NavSelectionMode.Single)
+        .SelectByClick(true)
+        .SearchEnabled(true)
+        .SearchMode(CollectionSearchMode.Contains)
+        .Height(250)
+        .OnItemClick(@<text>
+            function(args) {
+                component.close();
+            }
+        </text>)
+        .OnItemSelectionChanged(@<text>
+            function(args) {
+                component.option("value", args.component.getSelectedNodeKeys()[0]);
+            }
+        </text>)
+        .OnContentReady(@<text>
+            function(args) {
+                args.component.selectItem(component.option('value'));
+            }
+        </text>)
     )
-    .KeyExpr("OrganizationId")
-    .ParentIdExpr("ParentOrganizationId")
-    .ShowRowLines(true)
-    .ShowBorders(true)
-    .Editing(editing => editing
-        .Mode(GridEditMode.Form)
-        .AllowUpdating(true)
-        .AllowAdding(true)
-    )
-    .Columns(columns =>
-    {
-      columns.AddFor(m => m.OrganizationName);
-
-      columns.AddFor(m => m.FullName);
-
-      columns.AddFor(m => m.DateOfBirth);
-
-      columns.AddFor(m => m.Title);
-
-      columns.AddFor(m => m.Description);
-
-      columns.AddFor(m => m.Id).Visible(false);
-
-      columns.AddFor(m => m.ParentOrganizationId)
-          .Width(150)
-          .Visible(false)
-          .Lookup(lookup => lookup
-              .DataSource(ds => ds.Mvc().Controller("Organizations").LoadAction("Get").Key("Id"))
-              .DataSourceOptions(dso => dso.Sort(sort => sort.AddSorting("Id")))
-              .ValueExpr("Id")
-              .DisplayExpr("Name")
-          );
-
-      columns.Add()
-          .Type(TreeListCommandColumnType.Buttons)
-          .Buttons(b =>
-          {
-            b.Add().Name(TreeListColumnButtonName.Edit);
-          });
-    })
-    .ColumnAutoWidth(true)
-    .AutoExpandAll(true)
-) *@
+}

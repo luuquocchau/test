@@ -9,15 +9,17 @@ using DevExtreme.AspNet.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using HRM.UI.Services;
 using System.Xml.Linq;
+using Newtonsoft.Json;
+using HRM.UI.Models;
 
 namespace HRM_UI.Controllers {
 
     [Route("api/[controller]")]
     public class EmployeesController : Controller {
 
-        private readonly EmployeeService _employeeService;
+        private readonly IEmployeeService _employeeService;
 
-        public EmployeesController(EmployeeService employeeService)
+        public EmployeesController(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
         }
@@ -25,10 +27,48 @@ namespace HRM_UI.Controllers {
         [HttpGet]
         public object Get(DataSourceLoadOptions loadOptions)
         {
-            var data = _employeeService.GetEmployeesAsync().Result;
+            var data = _employeeService.GetEmployees().Result;
 
             return DataSourceLoader.Load(data, loadOptions);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Post(string values)
+        {
+            var employee = new EmployeeVM();
+            JsonConvert.PopulateObject(values, employee);
+
+            if (!TryValidateModel(employee))
+                return BadRequest();
+
+            await _employeeService.CreateEmployee(employee);
+            
+            return Ok();
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Put(int key, string values)
+        {
+            var employee = await _employeeService.GetEmployee(key);
+            if (employee == null)
+                return NotFound();
+
+            JsonConvert.PopulateObject(values, employee);
+
+            if (!TryValidateModel(employee))
+                return BadRequest();
+
+            await _employeeService.UpdateEmployee(employee);
+
+            return Ok();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int key)
+        {
+            await _employeeService.DeleteEmployee(key);
+
+            return Ok();
+        }
     }
 }

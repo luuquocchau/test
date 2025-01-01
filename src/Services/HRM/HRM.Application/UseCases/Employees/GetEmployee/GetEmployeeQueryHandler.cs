@@ -20,8 +20,8 @@ internal sealed class GetEmployeeQueryHandler(IEmployeeRepository employeeReposi
             employee.Title,
             employee.Description,
             employee.OrganizationId,
-            employee.Organization.ParentId,
-            employee.Organization.Name
+            employee.Organization?.ParentId,
+            employee.Organization?.Name
         );
 
         return Result.Ok(employeeDto);

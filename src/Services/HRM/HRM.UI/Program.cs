@@ -19,10 +19,11 @@ builder.Services.AddRefitClient<IOrganizationService>()
         c.BaseAddress = new(builder.Configuration["ApiSettings:BaseUrl"]!);
     });
 
-builder.Services.AddHttpClient<EmployeeService>(client =>
-{
-    client.BaseAddress = new(builder.Configuration["ApiSettings:BaseUrl"]);
-});
+builder.Services.AddRefitClient<IEmployeeService>()
+    .ConfigureHttpClient(c =>
+    {
+        c.BaseAddress = new(builder.Configuration["ApiSettings:BaseUrl"]!);
+    });
 
 var app = builder.Build();
 

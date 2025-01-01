@@ -4,24 +4,6 @@
 
 <h2>Organization</h2>
 
-@* @(Html.DevExtreme().DataGrid<OrganizationVM>()
-    .ShowBorders(true)
-    .DataSource(d => d.Mvc().Controller("Organizations").LoadAction("Get").Key("Id"))
-    .Columns(columns => {
-        columns.AddFor(m => m.Id);
-        columns.AddFor(m => m.Name);
-        columns.AddFor(m => m.Location);
-        columns.AddFor(m => m.Description);
-        columns.AddFor(m => m.IsActive);
-    })
-    .Paging(p => p.PageSize(10))
-    .FilterRow(f => f.Visible(true))
-    .HeaderFilter(f => f.Visible(true))
-    .GroupPanel(p => p.Visible(true))
-    .Grouping(g => g.AutoExpandAll(false))
-    .RemoteOperations(true)
-) *@
-
 @(Html.DevExtreme().TreeList<OrganizationVM>()
     .ID("organizations")
     .DataSource(ds => ds.Mvc()
