@@ -331,3 +331,4 @@ ASALocalRun/
 /src/.containers/identity
 /src/.files
 /src/.containers/db/shop
+/src/.containers/db
