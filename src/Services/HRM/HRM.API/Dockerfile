@@ -13,6 +13,10 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Services/HRM/HRM.API/HRM.API.csproj", "Services/HRM/HRM.API/"]
+COPY ["Services/HRM/HRM.Application/HRM.Application.csproj", "Services/HRM/HRM.Application/"]
+COPY ["Services/HRM/HRM.Domain/HRM.Domain.csproj", "Services/HRM/HRM.Domain/"]
+COPY ["BuildingBlocks/BuildingBlocks.SharedKernel/BuildingBlocks.SharedKernel.csproj", "BuildingBlocks/BuildingBlocks.SharedKernel/"]
+COPY ["Services/HRM/HRM.Infrastructure/HRM.Infrastructure.csproj", "Services/HRM/HRM.Infrastructure/"]
 RUN dotnet restore "./Services/HRM/HRM.API/HRM.API.csproj"
 COPY . .
 WORKDIR "/src/Services/HRM/HRM.API"

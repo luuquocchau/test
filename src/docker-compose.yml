@@ -1,31 +1,22 @@
 services:
-  shop.db:
+  hrm.db:
     image: mcr.microsoft.com/mssql/server
 
-  seq:
-    image: datalust/seq:latest
+  hrm.api:
+    image: luunt/hrmapi
 
-  cache:
-    image: redis:latest
+  hrm.ui:
+    image: luunt/hrmui
 
-  identity:
-    image: quay.io/keycloak/keycloak:latest
+  # hrm.api:
+  #   image: ${DOCKER_REGISTRY-}hrmapi
+  #   build:
+  #     context: .
+  #     dockerfile: Services/HRM/HRM.API/Dockerfile
 
-  maildev:
-    image: maildev/maildev
-
-  messagebroker:
-    image: rabbitmq:management
-
-  notification.api:
-    image: ${DOCKER_REGISTRY-}notificationapi
-    build:
-      context: .
-      dockerfile: Services/Notification/Notification.API/Dockerfile
-
-  shop.api:
-    image: ${DOCKER_REGISTRY-}shopapi
-    build:
-      context: .
-      dockerfile: Services/Shop/Shop.API/Dockerfile
+  # hrm.ui:
+  #   image: ${DOCKER_REGISTRY-}hrmui
+  #   build:
+  #     context: .
+  #     dockerfile: Services/HRM/HRM.UI/Dockerfile
 
