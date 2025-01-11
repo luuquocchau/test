@@ -12,6 +12,8 @@ public sealed class Employee : AggregateRoot<int>
 
     public string Title { get; private set; }
 
+    public string Address { get; private set; }
+
     public string? Description { get; private set; }
 
     public int OrganizationId { get; private set; }
